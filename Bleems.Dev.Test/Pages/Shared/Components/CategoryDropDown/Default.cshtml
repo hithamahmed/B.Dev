@@ -1,0 +1,8 @@
+﻿@model ICollection<Models.CategoryModel>
+
+@*<option disabled selected hidden value="0">Choose Category</option>*@
+
+@foreach (var item in Model.ToList())
+{
+    <option class="dropdown-item" value="@item.CategoryId">@item.CategoryName</option>
+}

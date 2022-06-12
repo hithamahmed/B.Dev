@@ -1,0 +1,132 @@
+﻿@page
+@model Bleems.Dev.Test.Pages.ProductsModel
+
+
+<link href="~/lib/datatables/css/dataTables.bootstrap4.min.css" rel="stylesheet" />
+                        
+ 
+                
+<a asp-page="NewProduct"
+   class="btn btn-sm btn-primary">New Product <i class="fas fa-arrow-left fs-4 me-2"></i></a>
+
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <table id="productsTbl" class="table table-striped table-bordered nowrap" width="100%">
+        <thead>
+            <tr class="text-start fw-bolder fs-5 gs-0">
+                <th class="w-10px pe-2">
+                    #
+                </th>
+                <th class="min-w-125px">Name</th>
+                <th class="min-w-125px">Price</th>
+                <th class="min-w-125px">Photo</th>
+                <th class="min-w-125px"></th>
+            </tr>
+        </thead>
+        <tbody class="text-gray-600 fw-bold">
+            @if (Model.ProductsList.Any())
+            {
+                foreach (var item in Model.ProductsList)
+                {
+                    <tr>
+                        <td>
+                        @Html.DisplayFor(x=> item.ProductId)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(x=> item.ProductName)
+                    </td>
+                    <td>
+                        <div class="badge badge-lg badge-info">@item.ProductPrice</div>
+                    </td>
+
+                    <td>
+                            @if (string.IsNullOrEmpty(item.ProductPhoto))
+                            {
+                                
+                            }
+                            else
+                            {
+                                <img src="~/@item.ProductPhoto"
+                         height="100" width="100"
+                         asp-append-version="true" />
+                            }
+                        
+                    </td>
+                    <td>
+
+                        <a href='#' class='btn btn-warning' onclick=EditProduct(@item.ProductId);>Edit</a>
+                        <a href='#' class='btn btn-danger' data-productid=@item.ProductId  onclick=DeleteProduct(this);>Delete</a>
+                    </td>
+
+                </tr>
+            }
+            }
+         
+        </tbody>
+    </table>
+
+</form>
+
+@section Scripts
+{
+    <script src="~/lib/datatables/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables/js/dataTables.bootstrap4.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function() {
+            $('.table').DataTable({
+ 
+            });
+      
+        });
+ 
+
+     
+        var loadProducts = function() {
+            var _url = "/Products?handler=AllProducts";
+            var dest = document.getElementById("ProductSection");
+            $.ajax({
+                type: "Get",
+                url: _url,
+                asyn: true,
+                success: function(result) {
+                    $(dest).html("");
+                    $(dest).html(result);
+                    if (result != "") {
+               
+                    }
+                }
+            })
+        };
+
+        var DeleteProduct = (function(e) {
+            var _url = "/Products?handler=RemoveProduct" ;
+            var dest = document.getElementById("ProductSection");
+            var productId = $(e).data("productid");
+
+            $.ajax({
+                type: "Get",
+                url: _url,
+                asyn: true,
+                data: {"productId" : productId} ,
+                headers: {
+                    RequestVerificationToken:
+                        $('input:hidden[name="__RequestVerificationToken"]').val()
+                },
+                success: function(result) {
+                    showDone("Deleted");
+                    var row = e.parentNode.parentNode;
+                    row.parentNode.removeChild(row);
+                }
+                , error: function(xhr, status, error) {
+                    var err = JSON.parse(xhr.responseText);
+                    showError(error);
+                }
+            });
+        });
+
+    </script>
+}
+ 
